@@ -1,0 +1,73 @@
+---
+# defaults file for consul
+
+ # settings
+consul_localrepo: false                     # use local rpm repository
+consul_version: 1.6.2                       # when consul_localrepo: false
+consul_mode: client                         # client | server
+consul_user: consul                         # system user
+consul_group: consul                        # system group
+consul_config_dir: /etc/consul.d            # config dir
+consul_http_disable: false                  # acces ui on http
+consul_http_ssl_verify: true                # agent tls verify
+consul_disable_remote_exec: true            # support for remote execution
+consul_enable_script_checks: false          # support for scripts in checks
+consul_enable_local_script_checks: false    # support for local scripts in checks
+
+# vars
+consul_acl_server: "{{ (consul_use_tls | bool) | ternary ('https', 'http') }}://{{ consul_acl_servers | random }}:{{ (consul_use_tls | bool) | ternary ('8501', '8500') }}"
+consul_acl_server_http_scheme: "{{ consul_acl_server.split ('://') [0] }}"
+consul_env_http_ssl: "{{ ('true') if consul_acl_server_http_scheme == 'https' else ('false') }}"
+consul_env_http_addr: "{{ consul_acl_server.split('://')[1] }}"
+agent_token_policy_name: "{{ consul_node_name | replace ('.', '-') }}-agent-token-policy"
+agent_token_policy_descr: '{{ consul_node_name }} agent token policy'
+consul_acl_servers: "[{% for item in groups['consul'] | map('extract',hostvars,['ansible_host']) %}\"{{ item }}\"{% if not loop.last %}, {% endif %}{% endfor %}]"
+os_project_name: "{{ ansible_fqdn.split ('.', 2) [1] }}"
+project_name: '{{ os_project_name }}'
+project_domain:
+
+# consul.hcl
+# https://www.consul.io/docs/agent/options.html
+consul_domain: '{{ os_project_name }}.consul.{{ project_domain }}.'
+consul_node_name: '{{ ansible_fqdn }}'
+consul_datacenter: '{{ os_project_name }}'
+consul_data_dir: /var/lib/consul
+consul_encrypt:
+consul_bind_addr: [ '{{ ansible_default_ipv4.address }}' ]
+consul_client_addr: [ '{{ ansible_default_ipv4.address }}', '127.0.0.1' ]
+consul_ui: "{{ 'true' if consul_mode == 'server' else 'false' }}"
+consul_bootstrap_expect: '{{ play_hosts | length }}'
+consul_ports:
+  dns: 8600
+  http: 8500
+  https: 8501
+  server: 8300
+  serf_lan: 8301
+  serf_wan: 8302
+consul_ca_file:
+consul_cert_file:
+consul_key_file:
+consul_acl_enable: true
+consul_acl_default_policy: deny
+consul_acl_down_policy: extend-cache
+consul_acl_enable_key_list_policy: true
+consul_acl_master_token:
+consul_join: "{% for item in groups['consul'] | map('extract',hostvars,['ansible_host']) %}\"{{ item }}\"{% if not loop.last %}, {% endif %}{% endfor %}"
+
+# agent-policy
+consul_acl_acl:               # [read | write] Operations for managing the ACL system ACL API
+consul_acl_event_rw: []       # Listing and firing events in the Event API
+consul_acl_keyring:           # [read | write] Keyring operations in the Keyring API
+consul_acl_operator:          # [read | write]
+consul_acl_query_rw: []       # Prepared query operations in the Prepared Query API
+consul_acl_query_ro: []       #
+consul_acl_services_rw: []    # Service-level catalog operations in the Catalog API, Health API, Prepared Query API, and Agent API
+consul_acl_sessions_rw: []    # Session operations in the Session API
+consul_acl_sessions_ro: []    #
+consul_acl_keys_rw: []        # Key/value store operations in the KV Store API
+consul_acl_keys_ro: []        #
+
+# sysconfig.consul
+consul_use_tls: true
+consul_tls_server_name: '{{ ansible_fqdn }}'
+

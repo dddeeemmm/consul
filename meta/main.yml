@@ -1,0 +1,23 @@
+galaxy_info:
+  author: Dmitrij Petrov
+  description: Install and configure Consul Server or Consul Client
+  company: Balance-Platform
+
+  # If the issue tracker for your role is not on github, uncomment the
+  # next line and provide a value
+  # issue_tracker_url: http://example.com/issue/tracker
+
+  license: GPL-2.0-or-later
+
+  min_ansible_version: 2.4
+
+  platforms:
+  - name: Centos
+    versions:
+    - 7
+
+  galaxy_tags:
+    - consul-server
+    - consul-client
+
+dependencies: []

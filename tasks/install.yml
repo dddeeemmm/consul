@@ -1,0 +1,58 @@
+---
+
+- block:
+
+    - name: install packages
+      yum:
+        name:
+          - wget
+          - consul
+          - python2-consul
+          - python2-pyhcl
+
+    - name: remove dist config
+      file:
+        path: /etc/consul.d/consul.json-dist
+        state: absent
+
+  when: consul_localrepo | bool
+
+
+- block:
+
+    - name: install packages
+      yum:
+        name:
+          - wget
+          - unzip
+
+    - name: check current installation
+      lineinfile:
+        name: /root/.bashrc
+        line: 'complete -C /usr/bin/consul consul'
+        state: present
+      check_mode: yes
+      register: check_current_installation
+
+
+    - block:
+
+        - name: wget consul zip
+          get_url:
+            url: https://releases.hashicorp.com/consul/{{ consul_version }}/consul_{{ consul_version }}_linux_amd64.zip
+            dest: /tmp/
+            mode: 0640
+
+        - name: extract consul
+          unarchive:
+            src: /tmp/consul_{{ consul_version }}_linux_amd64.zip
+            dest: /usr/bin/
+            remote_src: yes
+
+        - name: enable bash completion
+          shell: consul -autocomplete-install && complete -C /usr/local/bin/consul consul
+
+      when: check_current_installation is changed
+
+
+  when: not consul_localrepo

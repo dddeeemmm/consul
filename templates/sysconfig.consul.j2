@@ -1,0 +1,20 @@
+# ansible_managed
+
+CONSUL_OPTS=""
+#GOMAXPROCS=4
+{% if consul_acl_enable and consul_acl_agent_token | trim != '' %}
+CONSUL_HTTP_TOKEN={{ consul_acl_agent_token | trim }}
+{% endif %}
+{% if consul_use_tls %}
+CONSUL_CACERT=/etc/consul.d/tls/ca.crt
+CONSUL_CLIENT_CERT=/etc/consul.d/tls/consul.crt
+CONSUL_CLIENT_KEY=/etc/consul.d/tls/consul.key
+CONSUL_TLS_SERVER_NAME={{ consul_tls_server_name }}
+{% if consul_http_disable %}
+CONSUL_HTTP_SSL=True
+CONSUL_HTTP_ADDR="{{ ansible_fqdn }}:{{ consul_ports.https }}"
+{% else %}
+CONSUL_HTTP_SSL_VERIFY={{ (consul_http_ssl_verify | bool) | ternary ('true', 'false') }}
+{% endif %}
+{% endif %}
+

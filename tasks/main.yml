@@ -1,0 +1,18 @@
+---
+# tasks file for consul
+
+- import_tasks: asserts.yml
+- import_tasks: install.yml
+- import_tasks: firewalld.yml
+- import_tasks: config.yml
+
+- name: cluster stabilization (15 seconds)
+  wait_for:
+    timeout: 15
+  delegate_to: localhost
+  when:
+    - consul_mode == 'server'
+    - consul_restart.changed
+
+- import_tasks: acl.yml
+  when: consul_acl_enable | bool

@@ -1,0 +1,25 @@
+[consul]
+[consul:children]
+consul_server
+consul_client
+
+[consul_server]
+consul-[1:3]
+
+[consul_client]
+k8s-worker-[1:3]
+
+[consul:vars]
+ansible_host={{ inventory_hostname }}.{{ project_name }}.cloud.{{ project_domain }}
+ansible_ssh_user=centos
+consul_ca_file=certs/cacert.{{ project_domain }}.pem
+consul_cert_file=certs/wildcard.{{ os_project_name }}.cloud.{{ project_domain }}.crt
+consul_key_file=certs/wildcard.{{ os_project_name }}.cloud.{{ project_domain }}.key
+project_name={{ os_project_name }}
+project_domain=
+
+[consul_server:vars]
+consul_mode=server
+
+[consul_client:vars]
+consul_mode=client

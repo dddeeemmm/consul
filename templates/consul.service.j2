@@ -1,0 +1,22 @@
+# ansible_managed
+
+[Unit]
+Description="HashiCorp Consul - A service mesh solution"
+Documentation=http://www.consul.io
+After=network-online.target
+Wants=network-online.target
+ConditionFileNotEmpty=/etc/consul.d/consul.hcl
+
+[Service]
+User=consul
+Group=consul
+EnvironmentFile=/etc/sysconfig/consul
+ExecStart=/usr/bin/consul agent -config-dir=/etc/consul.d -data-dir=/var/lib/consul $CONSUL_OPTS
+ExecReload=/usr/bin/consul validate /etc/consul.d
+ExecReload=/usr/bin/consul reload
+KillMode=process
+Restart=on-failure
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

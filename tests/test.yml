@@ -1,0 +1,32 @@
+---
+
+- hosts: consul
+  gather_facts: no
+  tasks:
+    - wait_for_connection:
+
+- hosts: consul
+  roles:
+    - { role: localrepo,  tags: [ 'localrepo' ] }               # Install Consul from localrepo (consul_localrepo: true)
+    - { role: common,     tags: [ 'common' ]    }               # Install CA cert (consul_tls: true)
+
+# Without ACL & SSL from HashiCorp filestore repo
+- hosts: consul_server
+  roles:
+    - { role: consul,
+        consul_mode: server,                                    # [default: client] client | server
+        consul_localrepo: false,                                # [default: false] true | false
+        consul_use_tls: no,                                     # [default: yes] yes | no
+        consul_acl_enable: no,                                  # [default: yes] yes | no
+        tags: [ 'consul-server' ] }
+
+# With ACL & SSL from localrepo
+- hosts: consul_client
+  roles:
+    - { role: consul,
+        consul_mode: client,
+        consul_localrepo: true,
+        consul_ca_file: 'files/certs/cacert.{{ project_domain }}.pem',
+        consul_cert_file: 'files/certs/wildcard.{{ project_name }}.{{ project_domain }}.crt',
+        consul_key_file: 'files/certs/wildcard.{{ project_name }}.{{ project_domain }}.key',
+        tags: [ 'consul-client' ] }

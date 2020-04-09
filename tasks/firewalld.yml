@@ -1,0 +1,60 @@
+---
+
+- name: check firewalld state
+  command: systemctl is-enabled firewalld
+  failed_when: false
+  changed_when: false
+  register: check_firewalld_state
+
+- name: set firewalld state
+  set_fact:
+    use_firewalld: "{{ true if (check_firewalld_state.stdout == 'enabled') else false }}"
+
+
+- block:
+
+    - name: make sure a firewalld is running
+      systemd:
+        name: firewalld
+        state: started
+
+    - name: firewalld enabled dns and serf ports
+      firewalld:
+        rich_rule: "rule accept family=ipv4 port port={{ item.split ('/') [0] }} protocol={{ item.split ('/') [1] }} destination address={{ ansible_default_ipv4.address }}"
+        state: enabled
+        permanent: true
+        immediate: true
+      with_items:
+        - '{{ consul_ports.dns }}/udp'
+        - '{{ consul_ports.dns }}/tcp'
+        - '{{ consul_ports.server }}/tcp'
+        - '{{ consul_ports.serf_lan }}/tcp'
+        - '{{ consul_ports.serf_lan }}/udp'
+        - '{{ consul_ports.serf_wan }}/tcp'
+        - '{{ consul_ports.serf_wan }}/udp'
+
+    - name: "{{ (not consul_http_disable | bool) | ternary ('allow', 'deny') }} http port"
+      firewalld:
+        rich_rule: "rule accept family=ipv4 port port={{ item.split ('/') [0] }} protocol={{ item.split ('/') [1] }} destination address={{ ansible_default_ipv4.address }}"
+        state: "{{ (not consul_http_disable | bool) | ternary ('enabled', 'disabled') }}"
+        permanent: true
+        immediate: true
+      with_items: '{{ consul_ports.http }}/tcp'
+
+    - name: "{{ (consul_use_tls | bool) | ternary ('allow', 'deny') }} https port"
+      firewalld:
+        rich_rule: "rule accept family=ipv4 port port={{ item.split ('/') [0] }} protocol={{ item.split ('/') [1] }} destination address={{ ansible_default_ipv4.address }}"
+        state: "{{ (consul_use_tls | bool) | ternary ('enabled', 'disabled') }}"
+        permanent: true
+        immediate: true
+      with_items: '{{ consul_ports.https }}/tcp'
+
+    - name: enabled serf_lan
+      firewalld:
+        rich_rule: "rule accept family=ipv4 port port={{ item.split ('/') [0] }} protocol={{ item.split ('/') [1] }} destination address={{ ansible_default_ipv4.address }}"
+        state: enabled
+        permanent: true
+        immediate: true
+      with_items: '{{ consul_ports.serf_lan }}/tcp'
+
+  when: use_firewalld | bool

@@ -1,0 +1,105 @@
+---
+
+- name: place policy
+  template:
+    src: agent-policy.j2
+    dest: /etc/consul.d/agent-policy
+    owner: root
+    group: '{{ consul_group }}'
+    mode: 0640
+  register: place_policy
+
+- name: get policy id
+  environment:
+    CONSUL_HTTP_TOKEN: '{{ consul_acl_master_token }}'
+    CONSUL_HTTP_SSL: '{{ consul_env_http_ssl }}'
+    CONSUL_HTTP_ADDR: '{{ consul_env_http_addr }}'
+  shell: consul acl policy read -name {{ agent_token_policy_name }} | awk '/^ID/ { print $2 }'
+  register: get_policy_id
+  failed_when: false
+  changed_when: false
+
+- name: create agent policy
+  environment:
+    CONSUL_HTTP_TOKEN: "{{ consul_acl_master_token }}"
+    CONSUL_HTTP_SSL: '{{ consul_env_http_ssl }}'
+    CONSUL_HTTP_ADDR: '{{ consul_env_http_addr }}'
+  command: >
+    consul acl policy create
+    -name {{ agent_token_policy_name }}
+    -description "{{ consul_node_name }} Agent Token Policy"
+    -rules @/etc/consul.d/agent-policy
+  when: get_policy_id.stdout == ''
+
+- name: update agent policy
+  environment:
+    CONSUL_HTTP_TOKEN: '{{ consul_acl_master_token }}'
+    CONSUL_HTTP_SSL: '{{ consul_env_http_ssl }}'
+    CONSUL_HTTP_ADDR: '{{ consul_env_http_addr }}'
+  command: >
+    consul acl policy update
+    -name {{ agent_token_policy_name }}
+    -description "{{ consul_node_name }} Agent Token Policy"
+    -rules @/etc/consul.d/agent-policy
+  when:
+    - get_policy_id.stdout != ''
+    - place_policy.changed
+
+- name: read agent token
+  shell: awk -F '"' '/agent/ { print $2 }' /etc/consul.d/consul.hcl | sed 's/"//g'
+  failed_when: false
+  changed_when: false
+  register: read_agent_token
+
+- set_fact:
+    consul_acl_agent_token: '{{ read_agent_token.stdout }}'
+
+
+- block:
+
+    - name: create agent token
+      environment:
+        CONSUL_HTTP_TOKEN: '{{ consul_acl_master_token }}'
+        CONSUL_HTTP_SSL: '{{ consul_env_http_ssl }}'
+        CONSUL_HTTP_ADDR: '{{ consul_env_http_addr }}'
+      shell: >
+        consul acl token create
+        -policy-name {{ agent_token_policy_name }}
+        -description "{{ agent_token_policy_descr }}" | awk '/^SecretID/ { print $2 }'
+      register: create_agent_token
+
+    - set_fact:
+        consul_acl_agent_token: '{{ create_agent_token.stdout }}'
+
+  when: consul_acl_agent_token | trim == ''
+
+
+- block:
+
+    - name: renew config
+      template:
+        src: consul.hcl.j2
+        dest: /etc/consul.d/consul.hcl
+        owner: root
+        group: '{{ consul_group }}'
+        mode: 0640
+        validate: 'consul validate -config-format=hcl -quiet %s'
+      register: renew_config
+
+    - name: renew sysconfig
+      template:
+        src: sysconfig.consul.j2
+        dest: /etc/sysconfig/consul
+        owner: root
+        group: '{{ consul_group }}'
+        mode: 0640
+      register: renew_sysconfig
+
+  when: create_agent_token.changed
+
+
+- name: consul restart
+  systemd:
+    name: consul
+    state: restarted
+  when: renew_config.changed or renew_sysconfig.changed

@@ -1,0 +1,64 @@
+#jinja2: lstrip_blocks: True
+# ansible_managed
+
+domain = "{{ consul_domain }}"
+node_name = "{{ consul_node_name }}"
+datacenter = "{{ consul_datacenter }}"
+data_dir = "{{ consul_data_dir }}"
+encrypt = "{{ consul_encrypt }}"
+
+bind_addr = "{{ consul_bind_addr | join(' ') }}"
+client_addr = "{{ consul_client_addr | join(' ') }}"
+
+{% if consul_mode == 'server' %}
+server = true
+ui = {{ consul_ui }}
+
+bootstrap_expect = {{ consul_bootstrap_expect }}
+{% endif %}
+
+{% if consul_mode == 'client' %}
+enable_local_script_checks = {{ (consul_enable_local_script_checks | bool) | ternary ('true', 'false') }}
+enable_script_checks = {{ (consul_enable_script_checks | bool) | ternary ('true', 'false') }}
+{% endif %}
+
+ports {
+    dns = {{ consul_ports.dns }}
+    http = {{ (not consul_http_disable | bool) | ternary(consul_ports.http, -1) }}
+    https = {{ consul_ports.https }}
+    server = {{ consul_ports.server }}
+    serf_lan = {{ consul_ports.serf_lan }}
+    serf_wan = {{ consul_ports.serf_wan }}
+}
+
+{% if consul_use_tls %}
+ca_file = "/etc/consul.d/tls/ca.crt"
+cert_file = "/etc/consul.d/tls/consul.crt"
+key_file = "/etc/consul.d/tls/consul.key"
+verify_incoming_https = {{ (consul_ui | bool) | ternary ('false', 'true') }}
+verify_incoming_rpc = true
+verify_outgoing = true
+{% endif %}
+
+{% if consul_acl_enable %}
+acl {
+    enabled = true
+    default_policy = "{{ consul_acl_default_policy }}"
+    down_policy = "{{ consul_acl_down_policy }}"
+    enable_key_list_policy = {{ (consul_acl_enable_key_list_policy | bool) | ternary ('true', 'false') }}
+    tokens {
+    {% if consul_mode == 'server' %}
+        master = "{{ consul_acl_master_token }}"
+    {% endif %}
+    {% if consul_acl_agent_token | trim != "" %}
+        agent = "{{ consul_acl_agent_token | trim }}"
+    {% endif %}
+    }
+}
+{% endif %}
+
+retry_join = [ {{ consul_join }} ]
+
+disable_remote_exec = {{ (consul_disable_remote_exec | bool) | ternary ('true', 'false') }}
+disable_anonymous_signature = true
+disable_update_check = true

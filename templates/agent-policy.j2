@@ -1,0 +1,91 @@
+# ansible_managed
+
+# Operations for managing the ACL system ACL API
+{% if consul_acl_acl == 'read' %}
+acl = "read"
+{% elif consul_acl_acl == 'write' %}
+acl = "write"
+{% endif %}
+
+# Utility operations in the Agent API, other than service and check registration
+agent "{{ consul_node_name }}" {
+   policy = "write"
+}
+
+# Listing and firing events in the Event API
+event_prefix "" {
+policy = "read"
+}
+{% for event in consul_acl_event_rw %}
+event "{{ event }}" {
+policy = "write"
+}
+{% endfor %}
+
+# Key/value store operations in the KV Store API
+{% for key in consul_acl_keys_rw %}
+key_prefix "{{ key }}" {
+  policy = "write"
+}
+{% endfor %}
+{% for key in consul_acl_keys_ro %}
+key_prefix "{{ key }}" {
+  policy = "read"
+}
+{% endfor %}
+
+# Keyring operations in the Keyring API
+{% if consul_acl_keyring == 'read' %}
+keyring = "read"
+{% elif consul_acl_keyring == 'write' %}
+keyring = "write"
+{% endif %}
+
+# Node-level catalog operations in the Catalog API, Health API, Prepared Query API, Network Coordinate API, and Agent API
+node "{{ consul_node_name }}" {
+   policy = "write"
+}
+node_prefix "" {
+  policy = "read"
+}
+
+# Cluster-level operations in the Operator API, other than the Keyring API
+{% if consul_acl_operator == 'read' %}
+operator = "read"
+{% elif consul_acl_operator == 'write' %}
+operator = "write"
+{% endif %}
+
+# Prepared query operations in the Prepared Query API
+{% for query in consul_acl_query_ro %}
+query "{{ query }}" {
+  policy = "read"
+}
+{% endfor %}
+{% for query in consul_acl_query_rw %}
+query "{{ query }}" {
+  policy = "write"
+}
+{% endfor %}
+
+# Service-level catalog operations in the Catalog API, Health API, Prepared Query API, and Agent API
+service_prefix "" {
+  policy = "read"
+}
+{% for service in consul_acl_services_rw %}
+service "{{ service }}" {
+  policy = "write"
+}
+{% endfor %}
+
+# Session operations in the Session API
+{% for session in consul_acl_sessions_rw %}
+session_prefix "{{ session }}" {
+  policy = "write"
+}
+{% endfor %}
+{% for session in consul_acl_sessions_ro %}
+session_prefix "{{ session }}" {
+  policy = "read"
+}
+{% endfor %}
