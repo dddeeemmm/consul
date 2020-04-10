@@ -1,7 +1,6 @@
 # ansible_managed
 
 CONSUL_OPTS=""
-#GOMAXPROCS=4
 {% if consul_acl_enable and consul_acl_agent_token | trim != '' %}
 CONSUL_HTTP_TOKEN={{ consul_acl_agent_token | trim }}
 {% endif %}
