@@ -22,6 +22,12 @@ Role Variables
     consul_key_file:    # [default: files/certs/wildcard.{{ os_project_name }}.{{ project_domain }}.key]
 
 
+Requirements
+----------------
+
+    This role requires root privileges, so tell ansible to use become: true in any convenient way for you.
+
+
 Example Playbook
 ----------------
 
