@@ -4,6 +4,12 @@ Consul
     Install and configure Consul (https://consul.io)
 
 
+Requirements
+----------------
+
+    This role requires root privileges, so tell ansible to use become: true in any convenient way for you.
+
+
 Role Variables
 --------------
 
@@ -20,12 +26,6 @@ Role Variables
     consul_ca_file:     # [default: files/certs/cacert.{{ project_domain }}.pem]
     consul_cert_file:   # [default: files/certs/wildcard.{{ os_project_name }}.{{ project_domain }}.crt] 
     consul_key_file:    # [default: files/certs/wildcard.{{ os_project_name }}.{{ project_domain }}.key]
-
-
-Requirements
-----------------
-
-    This role requires root privileges, so tell ansible to use become: true in any convenient way for you.
 
 
 Example Playbook
