@@ -2,6 +2,7 @@ Consul
 =========
 
     Install and configure Consul (https://consul.io)
+    https://galaxy.ansible.com/dddeeemmm/os_mgmt
 
 
 Requirements
