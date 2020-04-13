@@ -7,6 +7,7 @@
 - import_tasks: config.yml
 
 - name: cluster stabilization (15 seconds)
+  become: no
   wait_for:
     timeout: 15
   delegate_to: localhost
