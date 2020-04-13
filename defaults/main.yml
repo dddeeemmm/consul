@@ -13,6 +13,7 @@ consul_http_ssl_verify: true                # agent tls verify
 consul_disable_remote_exec: true            # support for remote execution
 consul_enable_script_checks: false          # support for scripts in checks
 consul_enable_local_script_checks: false    # support for local scripts in checks
+consul_firewalld_zone: public               # firewalld zone for consul interface
 
 # vars
 consul_acl_server: "{{ (consul_use_tls | bool) | ternary ('https', 'http') }}://{{ consul_acl_servers | random }}:{{ (consul_use_tls | bool) | ternary ('8501', '8500') }}"

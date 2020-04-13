@@ -20,6 +20,7 @@
 
     - name: firewalld enabled dns and serf ports
       firewalld:
+        zone: '{{ consul_firewalld_zone }}'
         rich_rule: "rule accept family=ipv4 port port={{ item.split ('/') [0] }} protocol={{ item.split ('/') [1] }} destination address={{ ansible_default_ipv4.address }}"
         state: enabled
         permanent: true
@@ -35,6 +36,7 @@
 
     - name: "{{ (not consul_http_disable | bool) | ternary ('allow', 'deny') }} http port"
       firewalld:
+        zone: '{{ consul_firewalld_zone }}'
         rich_rule: "rule accept family=ipv4 port port={{ item.split ('/') [0] }} protocol={{ item.split ('/') [1] }} destination address={{ ansible_default_ipv4.address }}"
         state: "{{ (not consul_http_disable | bool) | ternary ('enabled', 'disabled') }}"
         permanent: true
@@ -43,6 +45,7 @@
 
     - name: "{{ (consul_use_tls | bool) | ternary ('allow', 'deny') }} https port"
       firewalld:
+        zone: '{{ consul_firewalld_zone }}'
         rich_rule: "rule accept family=ipv4 port port={{ item.split ('/') [0] }} protocol={{ item.split ('/') [1] }} destination address={{ ansible_default_ipv4.address }}"
         state: "{{ (consul_use_tls | bool) | ternary ('enabled', 'disabled') }}"
         permanent: true
@@ -51,6 +54,7 @@
 
     - name: enabled serf_lan
       firewalld:
+        zone: '{{ consul_firewalld_zone }}'
         rich_rule: "rule accept family=ipv4 port port={{ item.split ('/') [0] }} protocol={{ item.split ('/') [1] }} destination address={{ ansible_default_ipv4.address }}"
         state: enabled
         permanent: true
