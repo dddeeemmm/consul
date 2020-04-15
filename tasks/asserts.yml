@@ -4,5 +4,5 @@
   fail:
     msg: "Requirement distribution is Centos 7"
   when:
-    - ansible_distribution|lower != 'centos'
+    - ansible_distribution | lower != 'centos'
     - ansible_distribution_major_version | int != 7
