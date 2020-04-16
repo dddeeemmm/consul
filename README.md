@@ -45,7 +45,7 @@ Example Run
 License
 -------
 
-    GLP
+    GPl 3.0
 
 
 Author Information
