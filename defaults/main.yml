@@ -7,7 +7,6 @@ consul_version: 1.6.2                       # when consul_localrepo: false
 consul_mode: client                         # client | server
 consul_user: consul                         # system user
 consul_group: consul                        # system group
-consul_config_dir: /etc/consul.d            # config dir
 consul_http_disable: false                  # acces ui on http
 consul_http_ssl_verify: true                # agent tls verify
 consul_disable_remote_exec: true            # support for remote execution
