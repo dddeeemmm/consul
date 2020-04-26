@@ -6,7 +6,7 @@
 - import_tasks: firewalld.yml
 - import_tasks: config.yml
 
-- name: cluster stabilization (15 seconds)
+- name: waiting stabilization
   become: no
   wait_for:
     timeout: 15
