@@ -1,7 +1,0 @@
----
-
-# consul
-- src: git@github.com:balance-platform/consul.git
-  scm: git
-  name: consul
-  version: master
