@@ -45,7 +45,7 @@ Example Run
 License
 -------
 
-    GPLv3
+    MIT
 
 
 Author Information
