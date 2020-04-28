@@ -2,13 +2,13 @@ Consul
 =========
 
     Install and configure Consul (https://consul.io)
-    https://galaxy.ansible.com/dddeeemmm/os_mgmt
+    https://galaxy.ansible.com/dddeeemmm/consul
 
 
 Requirements
 ----------------
 
-    This role requires root privileges, so tell ansible to use become: true in any convenient way for you.
+    This role requires root privileges, so tell ansible to use become: true in any convenient way for you
 
 
 Role Variables
