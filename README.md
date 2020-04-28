@@ -38,8 +38,8 @@ Example Playbook
 Example Run
 ----------------
 
-    ansible-playbook test/test.yml -e project_name=dev -e project_domain=name.org --vault-password-file=~/.ansible-vault/long -i test/inventory
-    ansible-playbook test/test.yml -e project_name=dev -e project_domain=name.org -e consul_localrepo=false --vault-password-file=~/.ansible-vault/long -i test/inventory
+    ansible-playbook test/test.yml -e project_name=dev -e project_domain=name.org -i test/inventory
+    ansible-playbook test/test.yml -e project_name=dev -e project_domain=name.org -e consul_localrepo=false -i test/inventory
 
 
 License
