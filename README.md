@@ -9,6 +9,7 @@ Requirements
 ----------------
 
     This role requires root privileges, so tell ansible to use become: true in any convenient way for you
+    Distribution is Centos 7
 
 
 Role Variables
